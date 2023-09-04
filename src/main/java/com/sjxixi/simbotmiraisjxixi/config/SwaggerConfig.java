@@ -18,7 +18,7 @@ public class SwaggerConfig {
     // }
 
     @Bean
-    public OpenAPI apiInfo() {
+    public OpenAPI customOpenAPI() {
         return new OpenAPI().info(new Info()
                 .title("Spring Boot 集成 Swagger 构建 RESTFul API")
                 .description("QQ 群管理系统")

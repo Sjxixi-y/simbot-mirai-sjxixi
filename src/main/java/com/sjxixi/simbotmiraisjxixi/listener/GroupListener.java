@@ -16,6 +16,7 @@ import love.forte.simbot.component.mirai.event.MiraiMemberJoinRequestEvent;
 import love.forte.simbot.component.mirai.event.RequestMemberInfo;
 import love.forte.simbot.definition.Group;
 import love.forte.simbot.definition.GroupMember;
+import love.forte.simbot.definition.Member;
 import love.forte.simbot.definition.MemberInfo;
 import love.forte.simbot.event.GroupMemberDecreaseEvent;
 import love.forte.simbot.event.GroupMemberIncreaseEvent;
@@ -24,6 +25,7 @@ import love.forte.simbot.message.Messages;
 import love.forte.simbot.message.MessagesBuilder;
 import love.forte.simbot.utils.item.Items;
 import net.mamoe.mirai.Bot;
+import net.mamoe.mirai.BotFactory;
 import net.mamoe.mirai.Mirai;
 import net.mamoe.mirai.data.UserProfile;
 import org.slf4j.Logger;
@@ -60,7 +62,7 @@ public class GroupListener {
      */
     public Map<String, String> getMessages() {
         if (messages.size() < 1) {
-            List<Field> list = fieldService.getFieldImportantNotPage();
+            List<Field> list = fieldService.getFieldNotPage();
             list.forEach(field -> messages.put(field.getName(), field.getValue()));
         }
         return messages;
@@ -73,7 +75,7 @@ public class GroupListener {
         // 清空
         messages.clear();
         //
-        List<Field> list = fieldService.getFieldImportantNotPage();
+        List<Field> list = fieldService.getFieldNotPage();
         list.forEach(field -> messages.put(field.getName(), field.getValue()));
     }
 
@@ -215,6 +217,17 @@ public class GroupListener {
         logger.info("[主动退群] 用户：" + member.getUsername() + " -- QQ号: " + id);
     }
 
+    // @Listener
+    // @Filter(targets = @Filter.Targets(atBot = true))
+    // public void automaticResponse(GroupMessageEvent event) {
+    //     Group group = event.getGroup();
+    //     Member author = event.getAuthor();
+    //
+    //     new MessagesBuilder()
+    //             .at(author.getId())
+    //             .text()
+    // }
+
     /**
      * sjxixi相关指令
      */
@@ -286,6 +299,10 @@ public class GroupListener {
                 stream.forEach(member -> {
                     String code = member.getId().toString();
                     Users data = (Users) usersService.getUserByCode(code).getData();
+                    if (data == null) {
+                        group.sendBlocking(messages.text("发现成员未添加入数据库中，请先使用 [! s] 指令刷新群成员").build());
+                        return;
+                    }
                     if (data.getStatus()) {
                         messages.at(member.getId()).text("\n");
                     }

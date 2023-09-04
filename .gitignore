@@ -38,3 +38,4 @@ android_phone.json
 *.log
 device.json
 KFCFactory.json
+*.gz

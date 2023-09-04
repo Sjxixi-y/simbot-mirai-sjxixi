@@ -22,7 +22,12 @@ public class UsersController {
     UsersService usersService;
 
 
-    // 文档配置
+    /**
+     * 新增用户
+     *
+     * @param users 用户实体
+     * @return 返回对象
+     */
     @Operation(summary = "新增用户", description = "新增用户",
             parameters = {@Parameter(name = "user", description = "用户实体")})
     @ApiResponse(responseCode = "200", description = "新增成功")
@@ -32,7 +37,12 @@ public class UsersController {
         return usersService.addUser(users);
     }
 
-    // 文档配置
+    /**
+     * 根据 ID 删除用户
+     *
+     * @param id 用户ID
+     * @return 返回对象
+     */
     @Operation(summary = "删除用户", description = "根据ID删除用户",
             parameters = {@Parameter(name = "id", description = "用户id")})
     @ApiResponse(responseCode = "200", description = "删除成功")
@@ -42,12 +52,27 @@ public class UsersController {
         return usersService.deleteUserById(id);
     }
 
+    /**
+     * 根据 ID 取消删除
+     *
+     * @param id 用户ID
+     * @return 返回对象
+     */
+    @Operation(summary = "取消删除用户", description = "根据ID取消删除用户",
+            parameters = {@Parameter(name = "id", description = "黑名单用户id")})
+    @ApiResponse(responseCode = "200", description = "删除成功")
+    //
     @DeleteMapping("/false/{id}")
     public ResultVo deleteFalseUser(@PathVariable Integer id) {
         return usersService.deleteFalseUserById(id);
     }
 
-    // 文档配置
+    /**
+     * 更新用户
+     *
+     * @param users 用户实体
+     * @return 返回对象
+     */
     @Operation(summary = "更新用户", description = "更新用户",
             parameters = {@Parameter(name = "user", description = "用户实体")})
     @ApiResponse(responseCode = "200", description = "更新成功")

@@ -53,6 +53,7 @@ public class UsersService {
      * @return 返回对象
      */
     public ResultVo deleteUserById(Integer id) {
+        logger.info("[黑名单] 用户 ID: " + id + " 被拉入黑名单");
         usersMapper.deleteById(id);
         return ResultVo.success("删除成功！", null);
     }
@@ -64,11 +65,14 @@ public class UsersService {
      * @return 返回对象
      */
     public ResultVo deleteUserByCode(String code) {
+        logger.info("[黑名单] 用户 QQ号: " + code + " 被拉入黑名单");
         QueryWrapper where = new QueryWrapper().where(USERS.CODE.eq(code));
         int i = usersMapper.deleteByQuery(where);
         if (i == 1) {
+            logger.info("[黑名单] 成功！");
             return ResultVo.success("删除成功！", null);
         }
+        logger.info("[黑名单] 失败！");
         return ResultVo.fail("删除失败", null);
     }
 
@@ -79,6 +83,7 @@ public class UsersService {
      * @return 返回结果
      */
     public ResultVo deleteFalseUserById(Integer id) {
+        logger.info("[黑名单] 用户 ID: " + id + " 从黑名单中释放");
         LogicDeleteManager.skipLogicDelete();
         UpdateChain.of(Users.class)
                 .set(USERS.STATUS, 0)

@@ -43,10 +43,5 @@ public class Field {
      */
     @Column
     private String describe;
-    /**
-     * 是否重要
-     */
-    @Column
-    private Boolean isImportant;
 }
 
