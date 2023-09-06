@@ -14,4 +14,10 @@ public interface NumberUtil {
     Integer IMPORTANCE = 1;
     // 不重要
     Integer NOT_IMPORTANCE = 0;
+    // 一级问题
+    Integer LEVEL_ONE = 1;
+    // 二级问题
+    Integer LEVEL_TWO = 2;
+    // 三级问题
+    Integer LEVEL_THREE = 3;
 }

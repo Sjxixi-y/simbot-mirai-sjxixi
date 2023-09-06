@@ -11,8 +11,8 @@ import lombok.*;
 @Builder
 @Schema(name = "Paging", title = "分页对象")
 public class PagingVo {
-    String name;
-    String code;
+    String valueOne;
+    String valueTow;
     Integer pageIndex;
     Integer pageSize;
 }

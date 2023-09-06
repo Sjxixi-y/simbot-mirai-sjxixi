@@ -30,7 +30,6 @@ public class UsersController {
      */
     @Operation(summary = "新增用户", description = "新增用户",
             parameters = {@Parameter(name = "user", description = "用户实体")})
-    @ApiResponse(responseCode = "200", description = "新增成功")
     //
     @PostMapping
     public ResultVo addUser(@RequestBody Users users) {
@@ -45,7 +44,6 @@ public class UsersController {
      */
     @Operation(summary = "删除用户", description = "根据ID删除用户",
             parameters = {@Parameter(name = "id", description = "用户id")})
-    @ApiResponse(responseCode = "200", description = "删除成功")
     //
     @DeleteMapping("{id}")
     public ResultVo deleteUser(@PathVariable Integer id) {
@@ -60,7 +58,6 @@ public class UsersController {
      */
     @Operation(summary = "取消删除用户", description = "根据ID取消删除用户",
             parameters = {@Parameter(name = "id", description = "黑名单用户id")})
-    @ApiResponse(responseCode = "200", description = "删除成功")
     //
     @DeleteMapping("/false/{id}")
     public ResultVo deleteFalseUser(@PathVariable Integer id) {
@@ -75,7 +72,6 @@ public class UsersController {
      */
     @Operation(summary = "更新用户", description = "更新用户",
             parameters = {@Parameter(name = "user", description = "用户实体")})
-    @ApiResponse(responseCode = "200", description = "更新成功")
     //
     @PutMapping
     public ResultVo updateUser(@RequestBody Users users) {
@@ -91,7 +87,6 @@ public class UsersController {
     // 文档配置
     @Operation(summary = "获取用户", description = "分页查询",
             parameters = {@Parameter(name = "paging", description = "查询对象")})
-    @ApiResponse(responseCode = "200", description = "查询成功")
     //
     @GetMapping
     public ResultVo getUser(PagingVo paging) {
@@ -107,7 +102,6 @@ public class UsersController {
     //
     @Operation(summary = "获取黑名单", description = "分页查询",
             parameters = {@Parameter(name = "paging", description = "查询对象")})
-    @ApiResponse(responseCode = "200", description = "查询成功")
     //
     @GetMapping("/false")
     public ResultVo getFalse(PagingVo paging) {

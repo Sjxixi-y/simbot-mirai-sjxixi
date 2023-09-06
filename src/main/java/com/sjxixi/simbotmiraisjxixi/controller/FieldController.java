@@ -29,7 +29,6 @@ public class FieldController {
     // 文档配置
     @Operation(summary = "新增信息", description = "新增信息",
             parameters = {@Parameter(name = "field", description = "信息实体")})
-    @ApiResponse(responseCode = "200", description = "新增成功")
     //
     @PostMapping
     public ResultVo addField(@RequestBody Field field) {
@@ -44,7 +43,6 @@ public class FieldController {
      */
     @Operation(summary = "更新信息", description = "更新信息",
             parameters = {@Parameter(name = "field", description = "信息实体")})
-    @ApiResponse(responseCode = "200", description = "更新成功")
     //
     @PutMapping
     public ResultVo update(@RequestBody Field field) {
@@ -60,10 +58,9 @@ public class FieldController {
      */
     @Operation(summary = "获取重要信息", description = "分页查询",
             parameters = {@Parameter(name = "paging", description = "查询对象")})
-    @ApiResponse(responseCode = "200", description = "查询成功")
     //
     @GetMapping
     public ResultVo getFieldImportant(PagingVo paging) {
-        return fieldService.getFieldImportant(paging, true);
+        return fieldService.getFieldImportant(paging);
     }
 }
