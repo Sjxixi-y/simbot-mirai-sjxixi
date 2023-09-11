@@ -7,6 +7,7 @@ import com.sjxixi.simbotmiraisjxixi.entity.Users;
 import com.sjxixi.simbotmiraisjxixi.service.AtReplyService;
 import com.sjxixi.simbotmiraisjxixi.service.FieldService;
 import com.sjxixi.simbotmiraisjxixi.service.UsersService;
+import com.sjxixi.simbotmiraisjxixi.util.MenuUtil;
 import jakarta.annotation.Resource;
 
 import love.forte.simboot.annotation.Filter;
@@ -26,6 +27,7 @@ import love.forte.simbot.message.MessagesBuilder;
 import love.forte.simbot.utils.item.Items;
 import net.mamoe.mirai.Mirai;
 import net.mamoe.mirai.data.UserProfile;
+import net.mamoe.mirai.message.data.Face;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -55,12 +57,7 @@ public class GroupListener {
     /**
      * 重要消息，用于对数据进行判断
      */
-    private final Map<String, String> messages = new HashMap<>();
-
-    /**
-     * at 消息列表缓存
-     */
-    private final Map<Integer, String> reply = new HashMap<>();
+    private final Map<String, String> fieldMap = new HashMap<>();
 
     /**
      * 获取关键字段
@@ -68,24 +65,11 @@ public class GroupListener {
      * @return 字段 map
      */
     public Map<String, String> getMessages() {
-        if (messages.size() < 1) {
+        if (fieldMap.size() < 1) {
             List<Field> list = fieldService.getFieldSimBot();
-            list.forEach(field -> messages.put(field.getName(), field.getValue()));
+            list.forEach(field -> fieldMap.put(field.getName(), field.getValue()));
         }
-        return messages;
-    }
-
-    /**
-     * 获取消息缓存
-     *
-     * @return 消息 map
-     */
-    public Map<Integer, String> getReply() {
-        if (reply.size() < 1) {
-            List<AtReply> list = atReplyService.getReplyListSimBot(LEVEL_ONE, null);
-            list.forEach(atReply -> reply.put(atReply.getAid(), atReply.getValue()));
-        }
-        return reply;
+        return fieldMap;
     }
 
     /**
@@ -93,14 +77,10 @@ public class GroupListener {
      */
     public void updateMessages() {
         // 清空
-        messages.clear();
-        reply.clear();
+        fieldMap.clear();
         //
         List<Field> list1 = fieldService.getFieldSimBot();
-        list1.forEach(field -> messages.put(field.getName(), field.getValue()));
-        //
-        List<AtReply> list2 = atReplyService.getReplyListSimBot(LEVEL_ONE, null);
-        list2.forEach(atReply -> reply.put(atReply.getAid(), atReply.getValue()));
+        list1.forEach(field -> fieldMap.put(field.getName(), field.getValue()));
     }
 
     /**
@@ -146,11 +126,13 @@ public class GroupListener {
 
         logger.info("[入群申请] 切割消息如下: " + strings[length - 1]);
 
-        if (getMessages().get("入群问题").equals(strings[length - 1])) {
-            logger.info("[入群申请] 问题正确");
-            event.acceptAsync();
+        if (!getMessages().get("入群问题").equals(strings[length - 1])) {
+            logger.info("[入群申请] 问题错误");
+            event.rejectAsync("入群问题有误");
+            return;
         }
-        event.rejectAsync("入群问题有误");
+        logger.info("[入群申请] 问题正确");
+        event.acceptAsync();
     }
 
     /**
@@ -233,31 +215,23 @@ public class GroupListener {
     }
 
     /**
-     * 问题列表
+     * 菜单列表
      *
      * @param event 事件对象
      */
     @Listener
-    @Filter(targets = @Filter.Targets(atBot = true))
+    @Filter(value = "菜单")
     public void automaticResponse(GroupMessageEvent event) {
         Group group = event.getGroup();
         Member author = event.getAuthor();
 
-        logger.info("[at事件] 用户: " + author.getUsername() + " QQ: " + author.getId() + " @了机器人");
+        logger.info("[菜单] 用户: " + author.getUsername() + " QQ: " + author.getId() + " 呼唤了菜单");
 
-        logger.info("[at事件] 消息列表如下：");
+        List<AtReply> list = atReplyService.getReplyListSimBot(1);
 
-        MessagesBuilder message = new MessagesBuilder()
-                .at(author.getId())
-                .text("\n你有那些问题呢，输入 ! help <id>即可查询答案");
+        logger.info("[菜单] 菜单如下：" + list);
 
-        getReply().forEach((key, val) -> {
-            message.text("\n")
-                    .text("id：" + key + " - " + val);
-            logger.info("[at事件] id: " + key + " value" + val);
-        });
-
-        group.sendBlocking(message.build());
+        group.sendBlocking(MenuUtil.getMenu(list));
     }
 
     /**
@@ -293,25 +267,32 @@ public class GroupListener {
 
         switch (s[1]) {
             case "help" -> {
-                MessagesBuilder message = new MessagesBuilder()
-                        .at(author.getId())
-                        .text("\n问题详情，输入 ! help <id>即可查询答案");
-                List<AtReply> list = atReplyService.getReplyListSimBot(null, Integer.parseInt(s[2]));
+                List<AtReply> list = atReplyService.getReplyListSimBot(s[2]);
 
+                // 判断消息列表
                 if (list == null || list.size() < 1) {
-                    Messages build = message.text("\n无更详细内容").build();
+                    Messages build = new MessagesBuilder()
+                            .at(author.getId())
+                            .text("没有更详细的内容啦").build();
                     group.sendBlocking(build);
                     return;
                 }
 
-                list.forEach(reply -> {
-                    message.text("\n" + "id: " + reply.getAid() + " - " + reply.getValue());
-                });
+                Messages message = MenuUtil.getMenu(list);
 
-                group.sendAsync(message.build());
+                group.sendAsync(message);
             }
+
             case "server" -> {
 
+            }
+
+            default -> {
+                Messages build = new MessagesBuilder()
+                        .at(author.getId())
+                        .text("\nSjxixi管理的青楼必须井井有条").build();
+
+                group.sendBlocking(build);
             }
         }
     }
@@ -324,7 +305,13 @@ public class GroupListener {
     @Listener
     @Filter(value = "!.+", targets = @Filter.Targets(authors = {"2680031723", "1544117104"}))
     public void getSjxixi(GroupMessageEvent event) {
-        logger.info("[管理指令] " + event.getAuthor().getUsername() + " QQ: " + event.getAuthor().getId() + " 指令为: " + event.getMessageContent().getPlainText());
+
+        Member author = event.getAuthor();
+
+        // 获取群对象
+        Group group = event.getGroup();
+
+        logger.info("[管理指令] " + author.getUsername() + " QQ: " + author.getId() + " 指令为: " + event.getMessageContent().getPlainText());
 
         // 获取指令
         String text = event.getMessageContent().getPlainText();
@@ -341,8 +328,6 @@ public class GroupListener {
             return;
         }
 
-        // 获取群对象
-        Group group = event.getGroup();
 
         switch (s[1]) {
             /*
@@ -372,7 +357,7 @@ public class GroupListener {
                     usersService.addUserSimBot(user);
                 });
                 Messages messages = new MessagesBuilder()
-                        .at(event.getAuthor().getId())
+                        .at(author.getId())
                         .text("\n已刷新群，请进入后台进行查询，并查看日志")
                         .build();
                 group.sendBlocking(messages);
@@ -384,7 +369,7 @@ public class GroupListener {
                 Items<GroupMember> members = group.getMembers();
                 Stream<? extends GroupMember> stream = members.asStream();
                 MessagesBuilder messages = new MessagesBuilder()
-                        .at(event.getAuthor().getId())
+                        .at(author.getId())
                         .text("下面是黑名单成员，请及时清理:\n");
                 stream.forEach(member -> {
                     String code = member.getId().toString();
@@ -406,7 +391,7 @@ public class GroupListener {
                 Users user = usersService.getUserByCodeSimBot(s[2]);
                 if (user == null) {
                     Messages build = new MessagesBuilder()
-                            .at(event.getAuthor().getId())
+                            .at(author.getId())
                             .text("\n不存在此用户")
                             .build();
                     group.sendBlocking(build);
@@ -419,7 +404,7 @@ public class GroupListener {
 
                 String format = simpleDateFormat.format(user.getRegTime());
                 Messages build = new MessagesBuilder()
-                        .at(event.getAuthor().getId())
+                        .at(author.getId())
                         .text("查询结果如下：\n")
                         .text("QQ: " + user.getCode())
                         .text("\n昵称: " + user.getName())
@@ -434,7 +419,7 @@ public class GroupListener {
             case "break" -> {
                 updateMessages();
                 Messages build = new MessagesBuilder()
-                        .at(event.getAuthor().getId())
+                        .at(author.getId())
                         .text("\n刷新成功")
                         .build();
                 group.sendBlocking(build);

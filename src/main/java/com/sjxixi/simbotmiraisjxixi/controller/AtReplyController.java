@@ -1,18 +1,13 @@
 package com.sjxixi.simbotmiraisjxixi.controller;
 
+import com.sjxixi.simbotmiraisjxixi.entity.AtReply;
 import com.sjxixi.simbotmiraisjxixi.service.AtReplyService;
+import com.sjxixi.simbotmiraisjxixi.vo.AtReplyTwoVo;
 import com.sjxixi.simbotmiraisjxixi.vo.PagingVo;
 import com.sjxixi.simbotmiraisjxixi.vo.ResultVo;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "atReply", description = "消息管理")
 @CrossOrigin
 @RestController
 @RequestMapping("atReply")
@@ -20,10 +15,38 @@ public class AtReplyController {
     @Resource
     AtReplyService atReplyService;
 
-    @Operation(summary = "获取黑名单", description = "分页查询",
-            parameters = {@Parameter(name = "paging", description = "查询对象")})
+    @PostMapping
+    public ResultVo addResult(@RequestBody AtReply atReply) {
+        return atReplyService.addReply(atReply);
+    }
+
+    @PostMapping("/two")
+    public ResultVo addResultTwo(@RequestBody AtReplyTwoVo atReplyTwoVo) {
+        return atReplyService.addReplyTwo(atReplyTwoVo);
+    }
+
+    @DeleteMapping("{id}")
+    public ResultVo deleteResultById(@PathVariable Integer id) {
+        return atReplyService.deleteReplyById(id);
+    }
+
+    @PutMapping
+    public ResultVo updateResult(@RequestBody AtReply atReply) {
+        return atReplyService.updateReply(atReply);
+    }
+
+    @PutMapping("two")
+    public ResultVo updateResult(@RequestBody AtReplyTwoVo atReplyTwoVo) {
+        return atReplyService.updateReply(atReplyTwoVo);
+    }
+
     @GetMapping
-    public ResultVo getResultOne(PagingVo paging) {
+    public ResultVo getResult(PagingVo paging) {
         return atReplyService.getReplyList(paging);
+    }
+
+    @GetMapping("{value}")
+    public ResultVo getResult(@PathVariable String value) {
+        return atReplyService.getReplyList(value);
     }
 }
